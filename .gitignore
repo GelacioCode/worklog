@@ -36,6 +36,14 @@ yarn-error.log*
 # vercel
 .vercel
 
+# local smoke-test artifacts
+/tmp
+scripts/.smoke-out.log
+scripts/.last-smoke.log
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+CLAUDE.MD
+AGENTS.MD
