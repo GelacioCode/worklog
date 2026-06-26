@@ -30,7 +30,10 @@ export async function updateSession(request: NextRequest) {
 
   const { pathname } = request.nextUrl
   const isAuthRoute = pathname.startsWith("/login") || pathname.startsWith("/signup")
-  const isPublicRoute = isAuthRoute || pathname === "/"
+  // /auth/callback handles email confirmation + OAuth code exchange — must run
+  // without a session already in place, otherwise the code never gets traded.
+  const isAuthCallback = pathname.startsWith("/auth/callback")
+  const isPublicRoute = isAuthRoute || isAuthCallback || pathname === "/"
 
   if (!user && !isPublicRoute) {
     const url = request.nextUrl.clone()
@@ -39,6 +42,8 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
+  // Don't bounce confirmed users away from the callback route — it needs to
+  // finish exchanging the code and set the session cookie.
   if (user && isAuthRoute) {
     const url = request.nextUrl.clone()
     url.pathname = "/dashboard"
