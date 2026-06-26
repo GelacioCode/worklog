@@ -2,7 +2,7 @@
 
 import { Suspense, useState } from "react"
 import Link from "next/link"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useSearchParams } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { toast } from "sonner"
@@ -30,7 +30,6 @@ import { createClient } from "@/lib/supabase/client"
 import { loginSchema, type LoginInput } from "@/lib/validations/auth"
 
 function LoginForm() {
-  const router = useRouter()
   const searchParams = useSearchParams()
   const redirectTo = searchParams.get("redirectTo") || "/dashboard"
   const [loading, setLoading] = useState(false)
@@ -44,14 +43,15 @@ function LoginForm() {
     setLoading(true)
     const supabase = createClient()
     const { error } = await supabase.auth.signInWithPassword(values)
-    setLoading(false)
     if (error) {
+      setLoading(false)
       toast.error(error.message)
       return
     }
     toast.success("Welcome back")
-    router.push(redirectTo)
-    router.refresh()
+    // Hard nav so the new auth cookie is included on the server's first read.
+    // router.push + router.refresh can race here and briefly bounce back to /login.
+    window.location.href = redirectTo
   }
 
   return (

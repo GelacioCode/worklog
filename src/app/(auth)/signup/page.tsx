@@ -59,8 +59,8 @@ export default function SignupPage() {
       return
     }
     toast.success("Account created")
-    router.push("/dashboard")
-    router.refresh()
+    // Hard nav so the new auth cookie is included on the server's first read.
+    window.location.href = "/dashboard"
   }
 
   return (
